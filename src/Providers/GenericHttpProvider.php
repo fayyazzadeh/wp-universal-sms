@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fayyazdeh\UniversalSms\Providers;
 
+use Closure;
 use Fayyazdeh\UniversalSms\Contracts\SMSProviderInterface;
 use Fayyazdeh\UniversalSms\Contracts\SMSResponse;
 use Throwable;
@@ -14,7 +15,7 @@ final class GenericHttpProvider implements SMSProviderInterface
     public function __construct(
         private readonly string $id,
         private readonly array $config,
-        private readonly $requester = null,
+        private readonly ?Closure $requester = null,
     ) {
     }
 
@@ -86,7 +87,7 @@ final class GenericHttpProvider implements SMSProviderInterface
         ];
 
         try {
-            $raw = ($this->requester !== null)
+            $raw = $this->requester !== null
                 ? ($this->requester)($url, $args)
                 : $this->wordpressRequest($url, $args);
         } catch (Throwable) {
