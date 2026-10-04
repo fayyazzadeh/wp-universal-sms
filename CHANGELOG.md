@@ -2,6 +2,29 @@
 
 All notable changes to WP Universal SMS are documented here.
 
+## [0.2.0-beta] - 2026-10-04
+
+### Added
+
+- Professional WordPress Admin UI.
+- Dashboard, Gateway, Providers, and Logs screens.
+- Admin settings boundary.
+- Definition-driven provider metadata.
+- Responsive RTL-first styling.
+- Capability and nonce checks for gateway mutations.
+- Secret-safe dashboard read model.
+
+### Changed
+
+- Plugin bootstrap now registers admin menu, assets, and admin actions.
+
+### Security
+
+- Gateway mutations require `manage_options` and a WordPress nonce.
+- Secret configuration values are excluded from the dashboard read model.
+
+See `docs/releases/v0.2.0-beta.md` for the full release report.
+
 ## [0.1.0-beta] - 2026-10-04
 
 ### Added
