@@ -1,0 +1,162 @@
+:root {
+  --wpu-sms-border: #dcdcde;
+  --wpu-sms-muted: #646970;
+  --wpu-sms-surface: #ffffff;
+  --wpu-sms-bg: #f6f7f7;
+}
+
+.wpu-sms-admin {
+  max-width: 1180px;
+  margin-top: 28px;
+}
+
+.wpu-sms-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.wpu-sms-eyebrow {
+  color: var(--wpu-sms-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.wpu-sms-header h1 {
+  margin: 6px 0 8px;
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+.wpu-sms-header p {
+  margin: 0;
+  color: var(--wpu-sms-muted);
+  font-size: 14px;
+}
+
+.wpu-sms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.wpu-sms-card,
+.wpu-sms-panel {
+  background: var(--wpu-sms-surface);
+  border: 1px solid var(--wpu-sms-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.03);
+}
+
+.wpu-sms-card {
+  padding: 20px;
+}
+
+.wpu-sms-card span,
+.wpu-sms-card small {
+  display: block;
+  color: var(--wpu-sms-muted);
+}
+
+.wpu-sms-card strong {
+  display: block;
+  margin: 9px 0;
+  font-size: 22px;
+}
+
+.wpu-sms-panel {
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.wpu-sms-panel h2 {
+  margin-top: 0;
+}
+
+.wpu-sms-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.wpu-sms-field {
+  margin-bottom: 18px;
+}
+
+.wpu-sms-field label {
+  display: block;
+  margin-bottom: 7px;
+  font-weight: 600;
+}
+
+.wpu-sms-field input,
+.wpu-sms-field select,
+.wpu-sms-field textarea {
+  max-width: 620px;
+  width: 100%;
+}
+
+.wpu-sms-provider {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 15px 0;
+  border-top: 1px solid var(--wpu-sms-border);
+}
+
+.wpu-sms-provider:first-of-type {
+  border-top: 0;
+}
+
+.wpu-sms-provider strong,
+.wpu-sms-provider span {
+  display: block;
+}
+
+.wpu-sms-provider span {
+  color: var(--wpu-sms-muted);
+  margin-top: 4px;
+}
+
+.wpu-sms-badge {
+  display: inline-block !important;
+  border: 1px solid var(--wpu-sms-border);
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 12px;
+}
+
+.wpu-sms-badge.success {
+  border-color: #00a32a;
+  color: #008a20;
+}
+
+.wpu-sms-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.wpu-sms-chips span {
+  padding: 7px 10px;
+  border: 1px solid var(--wpu-sms-border);
+  border-radius: 8px;
+  background: var(--wpu-sms-bg);
+}
+
+@media (max-width: 782px) {
+  .wpu-sms-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wpu-sms-header h1 {
+    font-size: 25px;
+  }
+}
