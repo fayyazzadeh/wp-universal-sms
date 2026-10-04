@@ -10,6 +10,7 @@ final class ProviderDefinitions
     {
         return [
             'generic-http' => [
+                'id' => 'generic-http',
                 'label' => 'Generic HTTP / REST API',
                 'type' => 'http',
                 'methods' => ['GET', 'POST', 'PUT', 'PATCH'],

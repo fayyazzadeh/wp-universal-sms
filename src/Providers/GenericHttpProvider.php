@@ -37,13 +37,20 @@ final class GenericHttpProvider implements SMSProviderInterface
             return false;
         }
 
+        $connectionConfig = array_merge($connection, [
+            'auth' => $this->config['auth'] ?? [],
+            'headers' => array_merge($this->config['headers'] ?? [], $connection['headers'] ?? []),
+            'query' => array_merge($this->config['query'] ?? [], $connection['query'] ?? []),
+            'response' => $connection['response'] ?? ($this->config['response'] ?? []),
+        ]);
+
         return $this->request(
             '',
             '',
             true,
             (string) $connection['endpoint'],
             strtoupper((string) ($connection['method'] ?? 'GET')),
-            $connection
+            $connectionConfig
         )->success;
     }
 

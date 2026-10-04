@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Fayyazdeh\UniversalSms\Contracts;
 
-final readonly class SMSLogEntry
+final class SMSLogEntry
 {
     public function __construct(
         public string $provider,

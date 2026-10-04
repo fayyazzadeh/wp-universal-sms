@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Fayyazdeh\UniversalSms\Contracts;
 
-final readonly class SMSResponse
+final class SMSResponse
 {
     private function __construct(
         public bool $success,
