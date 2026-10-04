@@ -10,7 +10,7 @@ namespace {
     if (!function_exists('wp_nonce_field')) { function wp_nonce_field($action, $name) { echo '<input name="' . $name . '" value="nonce">'; } }
 }
 
-namespace Fayyazdeh\UniversalSms\Tests\Unit\Admin;
+namespace Fayyazdeh\UniversalSms\Tests\Unit\Admin {
 
 use Fayyazdeh\UniversalSms\Admin\AdminSettings;
 use Fayyazdeh\UniversalSms\Admin\Pages\ProvidersPage;
@@ -66,4 +66,5 @@ final class ProvidersPageTest extends TestCase
     }
 }
 
+}
 }
