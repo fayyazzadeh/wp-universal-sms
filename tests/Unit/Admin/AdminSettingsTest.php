@@ -22,7 +22,17 @@ final class AdminSettingsTest extends TestCase
 
     public function test_config_round_trip_preserves_non_secret_fields(): void
     {
-        $settings = new AdminSettings();
+        $store = [];
+        $storage = static function (string $operation, string $key, array $value = []) use (&$store): array {
+            if ($operation === 'set') {
+                $store[$key] = $value;
+                return $value;
+            }
+
+            return $store[$key] ?? [];
+        };
+
+        $settings = new AdminSettings($storage);
         $settings->saveGatewayConfig([
             'provider' => 'generic-http',
             'sender' => '3000',
@@ -35,5 +45,7 @@ final class AdminSettingsTest extends TestCase
             'sender' => '3000',
             'test_recipient' => '09120000000',
         ], $settings->getGatewayConfig());
+
+        self::assertSame('secret-value', $settings->getRawGatewayConfig()['api_key']);
     }
 }
