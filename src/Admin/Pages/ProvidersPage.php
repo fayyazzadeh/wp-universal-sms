@@ -139,8 +139,10 @@ final class ProvidersPage
         if ($values === []) {
             $values = ['' => ''];
         }
+        $index = 0;
         foreach ($values as $key => $value) {
-            echo '<div class="wpu-sms-pair"><input type="text" name="wpu_sms[' . esc_attr($name) . '][0][name]" value="' . esc_attr((string) $key) . '" placeholder="Name"><input type="text" name="wpu_sms[' . esc_attr($name) . '][0][value]" value="' . esc_attr((string) $value) . '" placeholder="Value"><button type="button" class="button" data-wpu-remove>Remove</button></div>';
+            echo '<div class="wpu-sms-pair"><input type="text" name="wpu_sms[' . esc_attr($name) . '][' . $index . '][name]" value="' . esc_attr((string) $key) . '" placeholder="Name"><input type="text" name="wpu_sms[' . esc_attr($name) . '][' . $index . '][value]" value="' . esc_attr((string) $value) . '" placeholder="Value"><button type="button" class="button" data-wpu-remove>Remove</button></div>';
+            $index++;
         }
         echo '<button type="button" class="button" data-wpu-add>Add row</button></div></div>';
     }
