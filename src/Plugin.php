@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fayyazdeh\UniversalSms;
 
+use Fayyazdeh\UniversalSms\Admin\AdminActions;
 use Fayyazdeh\UniversalSms\Admin\AdminMenu;
 use Fayyazdeh\UniversalSms\Admin\AdminSettings;
 use Fayyazdeh\UniversalSms\Core\ProviderRegistry;
@@ -13,15 +14,17 @@ final class Plugin
 {
     private static ?self $instance = null;
 
-    private function __construct(private readonly SMS $sms)
-    {
+    private function __construct(
+        private readonly SMS $sms,
+        private readonly ProviderRegistry $registry
+    ) {
     }
 
     public static function boot(): self
     {
         if (self::$instance === null) {
             $registry = new ProviderRegistry();
-            self::$instance = new self(new SMS($registry));
+            self::$instance = new self(new SMS($registry), $registry);
 
             if (function_exists('add_action')) {
                 add_action('admin_menu', [self::$instance, 'registerAdmin']);
@@ -71,35 +74,10 @@ final class Plugin
 
     public function handleAdminActions(): void
     {
-        if (!isset($_POST['wpu_sms_action']) || $_POST['wpu_sms_action'] !== 'save_gateway') {
-            return;
-        }
-
-        if (!current_user_can('manage_options')) {
-            return;
-        }
-
-        check_admin_referer('wpu_sms_save_gateway', 'wpu_sms_nonce');
-
-        $input = isset($_POST['wpu_sms']) && is_array($_POST['wpu_sms'])
-            ? $_POST['wpu_sms']
-            : [];
-
-        $settings = new AdminSettings();
-        $current = $settings->getRawGatewayConfig();
-        $settings->saveGatewayConfig(array_merge($current, [
-            'provider' => sanitize_text_field($input['provider'] ?? ''),
-            'sender' => sanitize_text_field($input['sender'] ?? ''),
-            'test_recipient' => sanitize_text_field($input['test_recipient'] ?? ''),
-        ]));
-
-        if (function_exists('add_settings_error')) {
-            add_settings_error(
-                'wpu_sms',
-                'gateway_saved',
-                'Gateway settings saved.',
-                'updated'
-            );
-        }
+        (new AdminActions(
+            new AdminSettings(),
+            $this->registry,
+            $this->sms
+        ))->handleRequest();
     }
 }
