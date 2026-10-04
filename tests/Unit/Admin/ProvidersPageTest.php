@@ -2,15 +2,7 @@
 
 declare(strict_types=1);
 
-namespace {
-    if (!function_exists('esc_html')) { function esc_html($v) { return htmlspecialchars((string) $v, ENT_QUOTES); } }
-    if (!function_exists('esc_attr')) { function esc_attr($v) { return htmlspecialchars((string) $v, ENT_QUOTES); } }
-    if (!function_exists('esc_textarea')) { function esc_textarea($v) { return htmlspecialchars((string) $v, ENT_QUOTES); } }
-    if (!function_exists('selected')) { function selected($selected, $current, $echo = true) { $value = (string) $selected === (string) $current ? ' selected="selected"' : ''; if ($echo) echo $value; return $value; } }
-    if (!function_exists('wp_nonce_field')) { function wp_nonce_field($action, $name) { echo '<input name="' . $name . '" value="nonce">'; } }
-}
-
-namespace Fayyazdeh\UniversalSms\Tests\Unit\Admin {
+namespace Fayyazdeh\UniversalSms\Tests\Unit\Admin;
 
 use Fayyazdeh\UniversalSms\Admin\AdminSettings;
 use Fayyazdeh\UniversalSms\Admin\Pages\ProvidersPage;
@@ -66,4 +58,3 @@ final class ProvidersPageTest extends TestCase
     }
 }
 
-}
