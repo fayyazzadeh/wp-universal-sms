@@ -23,6 +23,11 @@ final class AdminSettings
         ];
     }
 
+    public function getSafeGatewayConfig(): array
+    {
+        return GatewayConfig::safe($this->read());
+    }
+
     public function getRawGatewayConfig(): array
     {
         return $this->read();
