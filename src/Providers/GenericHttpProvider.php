@@ -26,13 +26,25 @@ final class GenericHttpProvider implements SMSProviderInterface
 
     public function send(string $mobile, string $message): SMSResponse
     {
-        return $this->request($mobile, $message);
+        return $this->request($mobile, $message, false);
     }
 
     public function testConnection(): bool
     {
-        $response = $this->request('', '');
-        return $response->success;
+        $connection = $this->config['connection'] ?? null;
+
+        if (!is_array($connection) || empty($connection['endpoint'])) {
+            return false;
+        }
+
+        return $this->request(
+            '',
+            '',
+            true,
+            (string) $connection['endpoint'],
+            strtoupper((string) ($connection['method'] ?? 'GET')),
+            $connection
+        )->success;
     }
 
     public function getBalance(): ?float
@@ -40,11 +52,18 @@ final class GenericHttpProvider implements SMSProviderInterface
         return null;
     }
 
-    private function request(string $mobile, string $message): SMSResponse
-    {
+    private function request(
+        string $mobile,
+        string $message,
+        bool $connectionTest,
+        ?string $endpointOverride = null,
+        ?string $methodOverride = null,
+        ?array $connectionConfig = null
+    ): SMSResponse {
         $started = microtime(true);
-        $endpoint = (string) ($this->config['endpoint'] ?? '');
-        $method = strtoupper((string) ($this->config['method'] ?? 'POST'));
+        $endpoint = $endpointOverride ?? (string) ($this->config['endpoint'] ?? '');
+        $method = $methodOverride ?? strtoupper((string) ($this->config['method'] ?? 'POST'));
+        $config = $connectionConfig ?? $this->config;
 
         if ($endpoint === '') {
             return SMSResponse::failure($this->id, 'invalid_configuration', 'Provider endpoint is missing.');
@@ -58,33 +77,49 @@ final class GenericHttpProvider implements SMSProviderInterface
         ];
 
         $url = RequestTemplate::interpolate($endpoint, $variables);
-        $query = RequestTemplate::interpolate($this->config['query'] ?? [], $variables);
-        $headers = RequestTemplate::interpolate($this->config['headers'] ?? [], $variables);
-        $body = RequestTemplate::interpolate($this->config['body'] ?? [], $variables);
+        $query = RequestTemplate::interpolate($config['query'] ?? [], $variables);
+        $headers = RequestTemplate::interpolate($config['headers'] ?? [], $variables);
+        $body = RequestTemplate::interpolate($config['body'] ?? [], $variables);
 
-        $auth = $this->config['auth'] ?? [];
-        if (($auth['type'] ?? '') === 'header') {
-            $name = (string) ($auth['name'] ?? '');
+        $auth = $config['auth'] ?? [];
+        $authType = (string) ($auth['type'] ?? '');
+
+        if ($authType === 'header' || $authType === 'api_key') {
+            $name = (string) ($auth['name'] ?? 'X-API-Key');
             if ($name !== '') {
-                $headers[$name] = (string) RequestTemplate::interpolate($auth['value'] ?? '', $variables);
+                $headers[$name] = (string) RequestTemplate::interpolate($auth['value'] ?? '{{api_key}}', $variables);
             }
-        } elseif (($auth['type'] ?? '') === 'query') {
+        } elseif ($authType === 'query') {
             $name = (string) ($auth['name'] ?? '');
             if ($name !== '') {
                 $query[$name] = (string) RequestTemplate::interpolate($auth['value'] ?? '', $variables);
             }
+        } elseif ($authType === 'bearer') {
+            $token = (string) RequestTemplate::interpolate($auth['value'] ?? '{{api_key}}', $variables);
+            $headers['Authorization'] = 'Bearer ' . $token;
+        } elseif ($authType === 'basic') {
+            $username = (string) RequestTemplate::interpolate($auth['username'] ?? '', $variables);
+            $password = (string) RequestTemplate::interpolate($auth['password'] ?? '', $variables);
+            $headers['Authorization'] = 'Basic ' . base64_encode($username . ':' . $password);
         }
 
         if ($query !== []) {
             $url .= (str_contains($url, '?') ? '&' : '?') . http_build_query($query);
         }
 
+        if (isset($headers['Content-Type']) && stripos((string) $headers['Content-Type'], 'application/json') !== false && is_array($body)) {
+            $body = json_encode($body, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
+
         $args = [
             'method' => $method,
             'headers' => $headers,
-            'body' => $body,
-            'timeout' => (int) ($this->config['timeout'] ?? 15),
+            'timeout' => (int) ($config['timeout'] ?? $this->config['timeout'] ?? 15),
         ];
+
+        if (!$connectionTest && $method !== 'GET') {
+            $args['body'] = $body;
+        }
 
         try {
             $raw = $this->requester !== null
@@ -115,7 +150,7 @@ final class GenericHttpProvider implements SMSProviderInterface
             );
         }
 
-        $responseConfig = $this->config['response'] ?? [];
+        $responseConfig = $config['response'] ?? [];
         $success = ResponseMapper::get($decoded, $responseConfig['success_path'] ?? null);
         $expected = $responseConfig['success_value'] ?? true;
 
