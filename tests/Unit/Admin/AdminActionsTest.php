@@ -161,7 +161,7 @@ final class AdminActionsTest extends TestCase
             $sms,
             static fn(): SMSProviderInterface => $provider,
             static fn(): bool => true,
-            static fn(): void => null
+            static function (): void {}
         );
     }
 }
