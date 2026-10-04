@@ -26,7 +26,11 @@ final class ProvidersPage
         echo '<div class="wpu-sms-header"><div><span class="wpu-sms-eyebrow">Providers</span><h1>Provider Configuration</h1><p>Configure the customer-owned SMS API. Save configuration before running tests.</p></div></div>';
 
         echo '<form method="post" class="wpu-sms-provider-form">';
-        wp_nonce_field('wpu_sms_save_gateway', 'wpu_sms_nonce');
+        if (function_exists('wp_nonce_field')) {
+            wp_nonce_field('wpu_sms_save_gateway', 'wpu_sms_nonce');
+        } else {
+            echo '<input type="hidden" name="wpu_sms_nonce" value="test-nonce">';
+        }
 
         echo '<input type="hidden" name="wpu_sms_action" value="save_gateway">';
         echo '<section class="wpu-sms-panel wpu-sms-section"><h2>Basic Configuration</h2>';
@@ -85,12 +89,36 @@ final class ProvidersPage
         echo '</div>';
     }
 
+    private function e(mixed $value): string
+    {
+        return function_exists('esc_html') ? esc_html((string) $value) : htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+    }
+
+    private function a(mixed $value): string
+    {
+        return function_exists('esc_attr') ? esc_attr((string) $value) : htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+    }
+
+    private function ta(mixed $value): string
+    {
+        return function_exists('esc_textarea') ? esc_textarea((string) $value) : htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+    }
+
+    private function selected(string $selected, string $current, bool $echo = false): string
+    {
+        if (function_exists('selected')) {
+            return (string) selected($selected, $current, $echo);
+        }
+
+        return $selected === $current ? ' selected="selected"' : '';
+    }
+
     private function input(string $label, string $name, string $value, string $placeholder, string $type = 'text', string $description = ''): void
     {
-        echo '<div class="wpu-sms-field"><label for="wpu-' . esc_attr(str_replace(['[', ']'], '-', $name)) . '">' . esc_html($label) . '</label>';
-        echo '<input id="wpu-' . esc_attr(str_replace(['[', ']'], '-', $name)) . '" type="' . esc_attr($type) . '" name="wpu_sms[' . esc_attr($name) . ']" value="' . esc_attr($value) . '" placeholder="' . esc_attr($placeholder) . '" class="regular-text">';
+        echo '<div class="wpu-sms-field"><label for="wpu-' . $this->a(str_replace(['[', ']'], '-', $name)) . '">' . $this->e($label) . '</label>';
+        echo '<input id="wpu-' . $this->a(str_replace(['[', ']'], '-', $name)) . '" type="' . $this->a($type) . '" name="wpu_sms[' . $this->a($name) . ']" value="' . $this->a($value) . '" placeholder="' . $this->a($placeholder) . '" class="regular-text">';
         if ($description !== '') {
-            echo '<p class="description">' . esc_html($description) . '</p>';
+            echo '<p class="description">' . $this->e($description) . '</p>';
         }
         echo '</div>';
     }
@@ -103,22 +131,22 @@ final class ProvidersPage
 
     private function textarea(string $label, string $name, string $value, string $placeholder, string $description = ''): void
     {
-        echo '<div class="wpu-sms-field"><label for="wpu-' . esc_attr(str_replace(['[', ']'], '-', $name)) . '">' . esc_html($label) . '</label>';
-        echo '<textarea id="wpu-' . esc_attr(str_replace(['[', ']'], '-', $name)) . '" name="wpu_sms[' . esc_attr($name) . ']" rows="8" placeholder="' . esc_attr($placeholder) . '" class="large-text code">' . esc_textarea($value) . '</textarea>';
+        echo '<div class="wpu-sms-field"><label for="wpu-' . $this->a(str_replace(['[', ']'], '-', $name)) . '">' . $this->e($label) . '</label>';
+        echo '<textarea id="wpu-' . $this->a(str_replace(['[', ']'], '-', $name)) . '" name="wpu_sms[' . $this->a($name) . ']" rows="8" placeholder="' . $this->a($placeholder) . '" class="large-text code">' . $this->ta($value) . '</textarea>';
         if ($description !== '') {
-            echo '<p class="description">' . esc_html($description) . '</p>';
+            echo '<p class="description">' . $this->e($description) . '</p>';
         }
         echo '</div>';
     }
 
     private function selectOptions(string $label, string $name, string $selected, array $options): void
     {
-        echo '<div class="wpu-sms-field"><label for="wpu-' . esc_attr(str_replace(['[', ']'], '-', $name)) . '">' . esc_html($label) . '</label><select id="wpu-' . esc_attr(str_replace(['[', ']'], '-', $name)) . '" name="wpu_sms[' . esc_attr($name) . ']">';
+        echo '<div class="wpu-sms-field"><label for="wpu-' . $this->a(str_replace(['[', ']'], '-', $name)) . '">' . $this->e($label) . '</label><select id="wpu-' . $this->a(str_replace(['[', ']'], '-', $name)) . '" name="wpu_sms[' . $this->a($name) . ']">';
         foreach ($options as $key => $labelText) {
             if (is_int($key)) {
                 $key = $labelText;
             }
-            echo '<option value="' . esc_attr((string) $key) . '"' . selected((string) $key, $selected, false) . '>' . esc_html((string) $labelText) . '</option>';
+            echo '<option value="' . $this->a((string) $key) . '"' . $this->selected((string) $key, $selected, false) . '>' . $this->e((string) $labelText) . '</option>';
         }
         echo '</select></div>';
     }
@@ -135,13 +163,13 @@ final class ProvidersPage
     private function pairs(string $label, string $name, mixed $values): void
     {
         $values = is_array($values) ? $values : [];
-        echo '<div class="wpu-sms-field"><label>' . esc_html($label) . '</label><div data-wpu-pairs data-name="' . esc_attr($name) . '">';
+        echo '<div class="wpu-sms-field"><label>' . $this->e($label) . '</label><div data-wpu-pairs data-name="' . $this->a($name) . '">';
         if ($values === []) {
             $values = ['' => ''];
         }
         $index = 0;
         foreach ($values as $key => $value) {
-            echo '<div class="wpu-sms-pair"><input type="text" name="wpu_sms[' . esc_attr($name) . '][' . $index . '][name]" value="' . esc_attr((string) $key) . '" placeholder="Name"><input type="text" name="wpu_sms[' . esc_attr($name) . '][' . $index . '][value]" value="' . esc_attr((string) $value) . '" placeholder="Value"><button type="button" class="button" data-wpu-remove>Remove</button></div>';
+            echo '<div class="wpu-sms-pair"><input type="text" name="wpu_sms[' . $this->a($name) . '][' . $index . '][name]" value="' . $this->a((string) $key) . '" placeholder="Name"><input type="text" name="wpu_sms[' . $this->a($name) . '][' . $index . '][value]" value="' . $this->a((string) $value) . '" placeholder="Value"><button type="button" class="button" data-wpu-remove>Remove</button></div>';
             $index++;
         }
         echo '<button type="button" class="button" data-wpu-add>Add row</button></div></div>';
