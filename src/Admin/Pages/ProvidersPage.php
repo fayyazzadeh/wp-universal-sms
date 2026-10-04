@@ -66,7 +66,7 @@ final class ProvidersPage
         $response = is_array($config['response'] ?? null) ? $config['response'] : [];
         echo '<section class="wpu-sms-panel wpu-sms-section"><h2>Mapping</h2>';
         $this->input('Success path', 'response[success_path]', $response['success_path'] ?? '', 'success');
-        $this->input('Expected success value', 'response[success_value]', $response['success_value'] ?? 'true', 'true');
+        $this->input('Expected success value', 'response[success_value]', (string) ($response['success_value'] ?? 'true'), 'true');
         $this->input('Message ID path', 'response[message_id_path]', $response['message_id_path'] ?? '', 'message_id');
         echo '</section>';
 
