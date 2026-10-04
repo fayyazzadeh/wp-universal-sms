@@ -65,3 +65,5 @@ final class ProvidersPageTest extends TestCase
         self::assertStringContainsString('__WPU_SMS_SECRET_MASKED__', $html);
     }
 }
+
+}
