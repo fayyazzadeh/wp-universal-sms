@@ -18,7 +18,7 @@ final class GenericHttpProviderTest extends TestCase
             [
                 'endpoint' => 'https://sms.example.test/send',
                 'method' => 'POST',
-                'headers' => ['X-Custom' => 'demo'],
+                'headers' => ['Content-Type' => 'application/json', 'X-Custom' => 'demo'],
                 'body' => [
                     'to' => '{{mobile}}',
                     'text' => '{{message}}',
@@ -46,8 +46,10 @@ final class GenericHttpProviderTest extends TestCase
         self::assertSame('msg-42', $response->messageId);
         self::assertSame('https://sms.example.test/send', $captured[0]);
         self::assertSame('secret-key', $captured[1]['headers']['X-API-Key']);
-        self::assertSame('09120000000', $captured[1]['body']['to']);
-        self::assertSame('Hello', $captured[1]['body']['text']);
+
+        $decodedBody = json_decode((string) $captured[1]['body'], true);
+        self::assertSame('09120000000', $decodedBody['to']);
+        self::assertSame('Hello', $decodedBody['text']);
     }
 
     public function test_timeout_is_normalized_without_exposing_secrets(): void
@@ -68,5 +70,35 @@ final class GenericHttpProviderTest extends TestCase
         self::assertFalse($response->success);
         self::assertSame('request_exception', $response->errorCode);
         self::assertStringNotContainsString('secret-token', $response->message);
+    }
+
+    public function test_connection_uses_a_dedicated_non_sending_endpoint(): void
+    {
+        $captured = null;
+
+        $provider = new GenericHttpProvider(
+            'generic',
+            [
+                'endpoint' => 'https://sms.example.test/send',
+                'connection' => [
+                    'endpoint' => 'https://sms.example.test/health',
+                    'method' => 'GET',
+                    'response' => [
+                        'success_path' => 'ok',
+                        'success_value' => true,
+                    ],
+                ],
+            ],
+            static function (string $url, array $args) use (&$captured): array {
+                $captured = [$url, $args];
+
+                return ['status' => 200, 'body' => json_encode(['ok' => true])];
+            }
+        );
+
+        self::assertTrue($provider->testConnection());
+        self::assertSame('https://sms.example.test/health', $captured[0]);
+        self::assertSame('GET', $captured[1]['method']);
+        self::assertArrayNotHasKey('body', $captured[1]);
     }
 }
