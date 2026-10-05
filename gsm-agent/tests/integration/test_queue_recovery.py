@@ -24,7 +24,9 @@ def test_stale_sending_message_is_requeued_after_lease_timeout(tmp_path):
     db.initialize()
     repo = MessageRepository(db)
     created = repo.create_or_get_by_request_id("client-a", record())
-    claimed = repo.claim_next_eligible(datetime.now(timezone.utc))
+
+    claimed_at = datetime.now(timezone.utc)
+    claimed = repo.claim_next_eligible(claimed_at)
     assert claimed.message_id == created.message_id
 
     db.close()
@@ -32,9 +34,12 @@ def test_stale_sending_message_is_requeued_after_lease_timeout(tmp_path):
     db2 = Database(path)
     db2.initialize()
     repo2 = MessageRepository(db2)
+
+    lease_timeout = timedelta(seconds=1)
+    recovery_at = claimed_at + lease_timeout + timedelta(microseconds=1)
     recovered = repo2.recover_stale_sending(
-        now=datetime.now(timezone.utc),
-        lease_timeout=timedelta(seconds=1),
+        now=recovery_at,
+        lease_timeout=lease_timeout,
     )
 
     assert recovered == 1
