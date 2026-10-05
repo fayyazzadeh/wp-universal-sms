@@ -33,3 +33,24 @@ jobs:
 
       - name: Run tests
         run: composer test
+
+  gsm-agent:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gsm-agent
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Agent test dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[test]"
+
+      - name: Run GSM Agent tests
+        run: python -m pytest -q
